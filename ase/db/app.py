@@ -17,7 +17,6 @@ Start with something like::
 
 """
 
-from __future__ import print_function
 import collections
 import functools
 import io
@@ -26,6 +25,7 @@ import os.path as op
 import re
 import sys
 import tempfile
+from typing import Dict, List, Tuple, Iterable
 
 from flask import Flask, render_template, request, send_from_directory, flash
 
@@ -37,7 +37,7 @@ except ImportError:
 
 import ase.db
 import ase.db.web
-from ase.db.core import convert_str_to_int_float_or_str
+from ase.db.core import convert_str_to_int_float_or_str, Database
 from ase.db.plot import atoms2png
 from ase.db.summary import Summary
 from ase.db.table import Table, all_columns
@@ -60,24 +60,23 @@ app = Flask(__name__)
 
 app.secret_key = 'asdf'
 
-databases = {}  # Dict[str, Database]
+databases = {}  # type: Dict[str, Database]
 home = ''  # link to homepage
 ase_db_footer = ''  # footer (for a license)
 open_ase_gui = True  # click image to open ASE's GUI
 download_button = True
 
 # List of (project-name, title, nrows) tuples (will be filled in at run-time):
-projects = []  # List[Tuple[str, str, int]]
+projects = []  # type: List[Tuple[str, str, int]]
 
 # Find numbers in formulas so that we can convert H2O to H<sub>2</sub>O:
 SUBSCRIPT = re.compile(r'(\d+)')
 
 next_con_id = 1
-connections = {}
+connections = {}  # type: Dict[int, Connection]
 
 
-def connect_databases(uris):
-    # (List[str]) -> None
+def connect_databases(uris: Iterable[str]) -> None:
     """Fill in databases dict."""
     python_configs = []
     dbs = []
