@@ -674,6 +674,17 @@ class Calculator(object):
         """Calculate magnetic moments projected onto atoms."""
         return self.get_property('magmoms', atoms)
 
+    def get_properties(self, properties, atoms):
+        # TODO: Instead of checking properies one by one, do the cache
+        # check a single time, then calculate all properties.
+        for name in properties:
+            self.get_property(name, atoms=atoms)
+
+        for name in properties:
+            assert name in self.results
+
+        return self.results
+
     def get_property(self, name, atoms=None, allow_calculation=True):
         if name not in self.implemented_properties:
             raise PropertyNotImplementedError('{} property not implemented'
@@ -747,7 +758,6 @@ class Calculator(object):
         The subclass implementation should first call this
         implementation to set the atoms attribute.
         """
-
         if atoms is not None:
             self.atoms = atoms.copy()
 
